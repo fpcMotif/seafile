@@ -12,6 +12,7 @@
 #include "unpack-trees.h"
 #include "vc-utils.h"
 #include "utils.h"
+#include "seafile-config.h"
 
 #include "processors/checkff-proc.h"
 
@@ -533,10 +534,13 @@ restart_task (sqlite3_stmt *stmt, void *data)
 
     repo = seaf_repo_manager_get_repo (seaf->repo_mgr, repo_id);
 
+    gboolean use_http = seafile_session_config_get_bool (seaf,
+                                                         KEY_ENABLE_HTTP_SYNC);
+
     if (repo != NULL && repo->head != NULL) {
         transition_state (task, CLONE_STATE_DONE);
         return TRUE;
-    } else if (task->repo_version > 0 && task->server_url)
+    } else if (use_http && task->repo_version > 0 && task->server_url)
         check_http_protocol (task);
     else
         connect_non_http_server (task);
@@ -1206,7 +1210,10 @@ add_task_common (SeafCloneManager *mgr,
         return NULL;
     }
 
-    if (task->repo_version > 0 && task->server_url)
+    gboolean use_http = seafile_session_config_get_bool (seaf,
+                                                         KEY_ENABLE_HTTP_SYNC);
+
+    if (use_http && task->repo_version > 0 && task->server_url)
         check_http_protocol (task);
     else
         connect_non_http_server (task);

@@ -2055,7 +2055,9 @@ auto_sync_pulse (void *vmanager)
 
         /* Try to use http sync first if enabled. */
         gboolean is_checking_http = FALSE;
-        if (repo->version > 0) {
+        gboolean use_http = seafile_session_config_get_bool (seaf,
+                                                             KEY_ENABLE_HTTP_SYNC);
+        if (use_http && repo->version > 0) {
             if (check_http_protocol (manager, repo, &is_checking_http)) {
                 sync_repo_v2 (manager, repo, FALSE);
                 continue;
